@@ -174,9 +174,16 @@ class ConnectomicsApp(tk.Tk):
         self.root_id_var = tk.StringVar()
         self.materialization_var = tk.StringVar()
         self.datastack_var = tk.StringVar(value=DEFAULT_DATASTACK)
+        self.postsyn_filter_var = tk.StringVar()
         self.status_var = tk.StringVar(value=self._initial_status_message())
 
+        self._postsyn_filter_trace = self.postsyn_filter_var.trace_add(
+            "write", lambda *_: self._on_postsyn_filter_change()
+        )
+
         self._current_fetch_thread: Optional[threading.Thread] = None
+        self._postsyn_data: List[SynapsePartner] = []
+        self._presyn_data: List[SynapsePartner] = []
 
         self._build_layout()
         self.bind("<Return>", lambda event: self.on_fetch())
@@ -224,11 +231,35 @@ class ConnectomicsApp(tk.Tk):
         self.presyn_frame = ttk.Frame(notebook)
         notebook.add(self.presyn_frame, text="Presynaptic partners (incoming)")
 
-        self.postsyn_tree, self.postsyn_total_var = self._build_partner_table(self.postsyn_frame)
-        self.presyn_tree, self.presyn_total_var = self._build_partner_table(self.presyn_frame)
+        self.postsyn_tree, self.postsyn_total_var = self._build_postsyn_section(self.postsyn_frame)
+        self.presyn_tree, self.presyn_total_var = self._build_presyn_section(self.presyn_frame)
 
         if CAVECLIENT_SPEC is None:
             self.fetch_button.state(["disabled"])
+
+    def _build_postsyn_section(self, parent: ttk.Frame) -> Tuple[ttk.Treeview, tk.StringVar]:
+        parent.columnconfigure(0, weight=1)
+        parent.rowconfigure(1, weight=1)
+
+        filter_frame = ttk.Frame(parent)
+        filter_frame.grid(row=0, column=0, sticky="ew", pady=(0, 8))
+        filter_frame.columnconfigure(1, weight=1)
+
+        ttk.Label(filter_frame, text="Filter partners").grid(row=0, column=0, sticky="w", padx=(0, 8))
+        filter_entry = ttk.Entry(filter_frame, textvariable=self.postsyn_filter_var)
+        filter_entry.grid(row=0, column=1, sticky="ew")
+        filter_entry.configure(takefocus=True)
+
+        table_frame = ttk.Frame(parent)
+        table_frame.grid(row=1, column=0, sticky="nsew")
+
+        return self._build_partner_table(table_frame)
+
+    def _build_presyn_section(self, parent: ttk.Frame) -> Tuple[ttk.Treeview, tk.StringVar]:
+        parent.columnconfigure(0, weight=1)
+        parent.rowconfigure(0, weight=1)
+
+        return self._build_partner_table(parent)
 
     def _build_partner_table(self, parent: ttk.Frame) -> Tuple[ttk.Treeview, tk.StringVar]:
         columns = ("partner", "synapses", "percentage")
@@ -322,6 +353,9 @@ class ConnectomicsApp(tk.Tk):
         )
 
     def _clear_tables(self) -> None:
+        self._postsyn_data = []
+        self._presyn_data = []
+
         for tree, total_var in (
             (self.postsyn_tree, self.postsyn_total_var),
             (self.presyn_tree, self.presyn_total_var),
@@ -347,11 +381,11 @@ class ConnectomicsApp(tk.Tk):
     ) -> None:
         self.fetch_button.state(["!disabled"])
 
-        self._populate_table(self.postsyn_tree, postsynaptic)
-        self._populate_table(self.presyn_tree, presynaptic)
+        self._postsyn_data = list(postsynaptic)
+        self._presyn_data = list(presynaptic)
 
-        self.postsyn_total_var.set(self._format_summary(postsynaptic))
-        self.presyn_total_var.set(self._format_summary(presynaptic))
+        self._refresh_postsyn_table()
+        self._refresh_presyn_table()
 
         if postsynaptic or presynaptic:
             self.status_var.set(
@@ -362,22 +396,82 @@ class ConnectomicsApp(tk.Tk):
                 f"No synapses found for root {root_id} at materialization {materialization_version}."
             )
 
-    def _populate_table(self, tree: ttk.Treeview, partners: Sequence[SynapsePartner]) -> None:
+    def _refresh_postsyn_table(self) -> None:
+        filter_value = self.postsyn_filter_var.get().strip()
+        if filter_value:
+            normalized_terms = [
+                term
+                for term in filter_value.replace(",", " ").split()
+                if term
+            ]
+            if normalized_terms:
+                filtered = [
+                    partner
+                    for partner in self._postsyn_data
+                    if any(term in str(partner.partner_root_id) for term in normalized_terms)
+                ]
+            else:
+                filtered = list(self._postsyn_data)
+        else:
+            filtered = list(self._postsyn_data)
+
+        displayed_count = self._populate_table(self.postsyn_tree, filtered)
+        self.postsyn_total_var.set(
+            self._format_summary(
+                self._postsyn_data,
+                filtered_count=len(filtered),
+                displayed_count=displayed_count,
+            )
+        )
+
+    def _refresh_presyn_table(self) -> None:
+        displayed_count = self._populate_table(self.presyn_tree, self._presyn_data)
+        self.presyn_total_var.set(
+            self._format_summary(self._presyn_data, displayed_count=displayed_count)
+        )
+
+    def _populate_table(self, tree: ttk.Treeview, partners: Sequence[SynapsePartner]) -> int:
         for item in tree.get_children():
             tree.delete(item)
 
-        for partner in partners[:MAX_DISPLAYED_PARTNERS]:
+        displayed_partners = partners[:MAX_DISPLAYED_PARTNERS]
+        for partner in displayed_partners:
             tree.insert(
                 "",
                 tk.END,
                 values=(partner.partner_root_id, partner.synapse_count, f"{partner.percentage:.2f}%"),
             )
 
-    def _format_summary(self, partners: Sequence[SynapsePartner]) -> str:
+        return len(displayed_partners)
+
+    def _on_postsyn_filter_change(self) -> None:
+        if not self._postsyn_data:
+            return
+        self._refresh_postsyn_table()
+
+    def _format_summary(
+        self,
+        partners: Sequence[SynapsePartner],
+        *,
+        filtered_count: Optional[int] = None,
+        displayed_count: Optional[int] = None,
+    ) -> str:
         total_synapses = sum(partner.synapse_count for partner in partners)
         if not partners:
             return "Synapses: 0"
-        return f"Synapses: {total_synapses} across {len(partners)} partners"
+        partner_count = len(partners)
+        summary = f"Synapses: {total_synapses} across {partner_count} partner"
+        if partner_count != 1:
+            summary += "s"
+
+        if filtered_count is not None and filtered_count != partner_count:
+            summary += f" (filtered to {filtered_count})"
+
+        effective_filtered = filtered_count if filtered_count is not None else partner_count
+        if displayed_count is not None and effective_filtered and displayed_count < effective_filtered:
+            summary += f" — showing top {displayed_count}"
+
+        return summary
 
 
 def main() -> None:
