@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "connectomics-cli"
+version = "0.1.0"
+description = "Tools for reproducible CAVE connectomics analysis"
+authors = [
+    {name = "OpenAI Assistant"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "typer[all]>=0.12",
+    "pandas>=2.2",
+    "pyarrow>=14",
+    "matplotlib>=3.8",
+    "networkx>=3.2",
+    "caveclient>=5.10",
+    "rich>=13.7"
+]
+
+[project.scripts]
+connectomics = "connectomics_cli.cli:app"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+  "E",
+  "F",
+  "I",
+  "PL",
+  "RUF",
+]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.13"
+warn_unused_configs = true
+warn_return_any = true
+warn_unused_ignores = true
+strict = true
+mypy_path = "src"
+
+[tool.coverage.run]
+source = ["connectomics_cli"]
+branch = true
