@@ -1,4 +1,5 @@
 [build-system]
+<<<<<<< HEAD
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
@@ -63,3 +64,19 @@ mypy_path = "src"
 [tool.coverage.run]
 source = ["connectomics_cli"]
 branch = true
+=======
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cx-connectome"
+version = "0.1.0"
+description = "Connectomics CI extensions"
+authors = [{name = "Connectomics Team"}]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+dyn = ["torch>=2.4,<3"]
+>>>>>>> 8f0f588 (Add CI scaffolding and configuration)

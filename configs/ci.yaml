@@ -1,0 +1,10 @@
+materialization: 783
+k_hops: [1, 2, 3, 4, 5]
+chunk_size_cols: 4096
+normalize: post_total      # column normalize by post-total input
+effective_threshold_norm_input: 0.01
+signed_mode: net           # net or blocks
+tau: 0.20
+excitability: 1.0
+time_steps: 12
+divisive_norm: false

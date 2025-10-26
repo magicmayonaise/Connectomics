@@ -1,6 +1,10 @@
 __pycache__/
+<<<<<<< HEAD
 *.pyc
 .mypy_cache/
 .pytest_cache/
 out/*
 !out/.gitkeep
+=======
+*.py[cod]
+>>>>>>> 8f0f588 (Add CI scaffolding and configuration)

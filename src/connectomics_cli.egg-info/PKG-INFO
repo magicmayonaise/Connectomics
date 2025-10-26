@@ -1,4 +1,20 @@
-<<<<<<< HEAD
+Metadata-Version: 2.4
+Name: connectomics-cli
+Version: 0.1.0
+Summary: Tools for reproducible CAVE connectomics analysis
+Author: OpenAI Assistant
+Requires-Python: >=3.13
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: typer[all]>=0.12
+Requires-Dist: pandas>=2.2
+Requires-Dist: pyarrow>=14
+Requires-Dist: matplotlib>=3.8
+Requires-Dist: networkx>=3.2
+Requires-Dist: caveclient>=5.10
+Requires-Dist: rich>=13.7
+Dynamic: license-file
+
 # Connectomics CLI
 
 Connectomics CLI provides reproducible workflows for querying the [CAVE](https://global.daf-apis.com/cave/doc) materialization service and summarising synaptic connectivity from public datasets such as FlyWire.
@@ -66,12 +82,3 @@ pytest
 
 Unit tests rely on stub clients and golden CSV fixtures to remain deterministic.
 
-=======
-# Connectomics
-
-## CI Upgrades
-Effective connectivity augments structural adjacency with multi-hop weighting so the CI stack can focus on information flow instead of raw synapse counts (Fig. 1–2).
-Signed excitatory-inhibitory blocks preserve direction-specific balance, allowing downstream solvers to mix net and block-resolved modes when summarizing motifs (Fig. 1–2).
-Receptive field clustering (RFC) links pathway structure to measured responses, turning meso-scale dynamics into interpretable feature banks for decoding (Fig. 1–2).
-The non-linear dynamics model integrates divisive normalization and excitability control to replay realistic transient states before readout, mirroring the cascades illustrated in Fig. 1–2.
->>>>>>> 8f0f588 (Add CI scaffolding and configuration)
