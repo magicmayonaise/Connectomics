@@ -1,0 +1,11 @@
+seed_set,neuron,type,notes
+NPFR L1-l,NPFRL1-L,peptidergic,Feeding satiety gating neuron (left column)
+NPFR L1-l,NPFRL1-R,peptidergic,Feeding satiety gating neuron (right column)
+oviIN,oviIN-L,cholinergic,Left oviposition integration interneuron
+oviIN,oviIN-R,cholinergic,Right oviposition integration interneuron
+SMP/circadian,SMP-Clock1,clock,Clock output projecting to EB and FB
+SMP/circadian,SMP-Clock2,clock,Clock output projecting to LAL and PB
+NPF/Leucokinin,NPF-LK1,peptidergic,NPF-positive leucokinin neuron innervating CX
+NPF/Leucokinin,NPF-LK2,peptidergic,Partner leucokinin neuron providing bilateral input
+Thirst/peptidergic,Thirst-PR1,peptidergic,Peptidergic thirst state neuron linking to PB
+Thirst/peptidergic,Thirst-PR2,peptidergic,Peptidergic thirst state neuron linking to FB

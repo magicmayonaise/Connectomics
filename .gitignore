@@ -1,5 +1,6 @@
 __pycache__/
 <<<<<<< HEAD
+<<<<<<< HEAD
 *.pyc
 .mypy_cache/
 .pytest_cache/
@@ -34,3 +35,7 @@ venv/
 
 # Project outputs
 out/
+=======
+*.pyc
+output/
+>>>>>>> 96bbd16 (Add CX state overlay analysis pipeline)
