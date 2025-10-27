@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 """Contextualized receptive field calculations."""
 
 from __future__ import annotations
@@ -195,3 +196,24 @@ def compute_rfc(
 
 
 __all__ = ["compute_rfc"]
+=======
+"""Typed stubs for receptive field clustering (RFC)."""
+
+from __future__ import annotations
+
+from typing import Any, Protocol, Sequence
+
+__all__ = ["RFCEstimator"]
+
+
+class RFCEstimator(Protocol):
+    """Protocol describing RFC estimation."""
+
+    def fit(self, inputs: Sequence[Any], responses: Sequence[Any]) -> Any:
+        """Fit RFC parameters to the provided dataset."""
+        ...
+
+    def transform(self, inputs: Sequence[Any]) -> Any:
+        """Transform inputs into RFC feature space."""
+        ...
+>>>>>>> 8f0f588 (Add CI scaffolding and configuration)
