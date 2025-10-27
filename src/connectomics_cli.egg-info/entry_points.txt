@@ -1,2 +1,0 @@
-[console_scripts]
-connectomics = connectomics_cli.cli:app

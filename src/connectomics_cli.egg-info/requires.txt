@@ -1,7 +1,0 @@
-typer[all]>=0.12
-pandas>=2.2
-pyarrow>=14
-matplotlib>=3.8
-networkx>=3.2
-caveclient>=5.10
-rich>=13.7

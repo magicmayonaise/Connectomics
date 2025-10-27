@@ -8,3 +8,29 @@ out/*
 =======
 *.py[cod]
 >>>>>>> 8f0f588 (Add CI scaffolding and configuration)
+
+# Python / build
+__pycache__/
+*.py[cod]
+*.egg-info/
+.build/
+dist/
+.buildozer/
+
+# Virtual envs
+.venv/
+venv/
+.env/
+
+# Tools caches
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Editors/OS
+.vscode/
+.idea/
+.DS_Store
+
+# Project outputs
+out/
