@@ -1,0 +1,24 @@
+{
+  "streams": [
+    {
+      "stream_key": "pfn_a",
+      "display_name": "PFN-A",
+      "pfn_roots": [1001, 1002],
+      "h_delta_roots": [2001],
+      "pfl_roots": [3001, 3002]
+    },
+    {
+      "stream_key": "pfn_b",
+      "display_name": "PFN-B",
+      "pfn_roots": [1101, 1102],
+      "h_delta_roots": [2101],
+      "pfl_roots": [3101]
+    }
+  ],
+  "seed_sets": {
+    "visual": [4001, 4002],
+    "ascending": [5001],
+    "central": [6001, 6002],
+    "drive_state": [7001]
+  }
+}
