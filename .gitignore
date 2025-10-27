@@ -1,5 +1,6 @@
 __pycache__/
 <<<<<<< HEAD
+<<<<<<< HEAD
 *.pyc
 .mypy_cache/
 .pytest_cache/
@@ -34,3 +35,6 @@ venv/
 
 # Project outputs
 out/
+=======
+*.pyc
+>>>>>>> 95bc430 (Add activation maximization optimizer and CLI)
