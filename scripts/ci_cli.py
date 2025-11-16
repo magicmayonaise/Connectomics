@@ -55,6 +55,7 @@ COMMANDS: List[str] = [
     "simulate",
     "optimal",
     "metrics",
+    "paths",
     "cx-atlas",
     "state-overlay",
 ]
