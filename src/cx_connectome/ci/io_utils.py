@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 """Utilities for building CI adjacency matrices.
 
 This module provides helpers for extracting scoped ID sets from the
@@ -296,20 +295,3 @@ __all__ = [
     "fetch_edges",
     "resolve_scope",
 ]
-=======
-"""Typed stubs for CI configuration and data I/O helpers."""
-
-from __future__ import annotations
-
-from typing import Any, Mapping, Protocol
-
-__all__ = ["ConfigLoader"]
-
-
-class ConfigLoader(Protocol):
-    """Protocol describing loading of CI configuration artifacts."""
-
-    def load(self, source: str) -> Mapping[str, Any]:
-        """Return a mapping representing the CI configuration."""
-        ...
->>>>>>> 8f0f588 (Add CI scaffolding and configuration)
