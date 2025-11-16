@@ -4,7 +4,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Sequence
+
+from cx_connectome.ci import paths as ci_paths
 
 try:
     import typer
@@ -47,7 +49,7 @@ class RunContext:
         )
 
 
-COMMANDS: List[str] = [
+LEDGER_COMMANDS: List[str] = [
     "effective",
     "signed",
     "slice",
@@ -55,10 +57,48 @@ COMMANDS: List[str] = [
     "simulate",
     "optimal",
     "metrics",
-    "paths",
     "cx-atlas",
     "state-overlay",
 ]
+
+PATHS_OUTPUT_DEFAULT = Path("./out/ci-paths")
+
+
+def run_paths_workflow(
+    *,
+    adjacency: Path,
+    sources: Sequence[int],
+    targets: Sequence[int],
+    max_hops: int,
+    source_column: Optional[str],
+    target_column: Optional[str],
+    output: Path,
+) -> None:
+    """Execute the path extraction workflow used by ``ci-cli paths``."""
+
+    if not sources:
+        raise ValueError("At least one --source value must be provided.")
+    if not targets:
+        raise ValueError("At least one --target value must be provided.")
+    if max_hops <= 0:
+        raise ValueError("max-hops must be a positive integer.")
+
+    adjacency_table = ci_paths.load_adjacency_table(adjacency)
+    result = ci_paths.extract_paths(
+        adjacency_table,
+        sources=list(sources),
+        targets=list(targets),
+        max_hops=max_hops,
+        source_column=source_column,
+        target_column=target_column,
+    )
+    metadata = {
+        "adjacency_path": str(adjacency.resolve()),
+        "sources": list(sources),
+        "targets": list(targets),
+        "max_hops": max_hops,
+    }
+    ci_paths.write_path_outputs(result, output, metadata=metadata)
 
 
 def _handle_command(
@@ -136,8 +176,45 @@ if typer is not None:  # pragma: no branch
         _command.__doc__ = f"Run the '{name}' CI workflow."
         return _command
 
-    for command in COMMANDS:
+    for command in LEDGER_COMMANDS:
         app.command(command)(command_factory(command))
+
+    @app.command("paths")
+    def paths_command(
+        adjacency: Path = typer.Option(
+            ..., "--adjacency", help="Path to a CSV or Parquet adjacency table."
+        ),
+        sources: List[int] = typer.Option(
+            ..., "--source", "-s", help="Source root ID; repeat for multiple sources."
+        ),
+        targets: List[int] = typer.Option(
+            ..., "--target", "-t", help="Target root ID; repeat for multiple targets."
+        ),
+        max_hops: int = typer.Option(3, "--max-hops", help="Maximum hop distance to explore."),
+        source_column: Optional[str] = typer.Option(
+            None, "--source-column", help="Override automatic source column detection."
+        ),
+        target_column: Optional[str] = typer.Option(
+            None, "--target-column", help="Override automatic target column detection."
+        ),
+        output: Path = typer.Option(
+            PATHS_OUTPUT_DEFAULT,
+            "--output",
+            help="Directory where path summaries should be written.",
+        ),
+    ) -> None:
+        try:
+            run_paths_workflow(
+                adjacency=adjacency,
+                sources=sources,
+                targets=targets,
+                max_hops=max_hops,
+                source_column=source_column,
+                target_column=target_column,
+                output=output,
+            )
+        except ValueError as err:
+            raise typer.BadParameter(str(err))
 
     def main() -> None:
         app()
@@ -155,7 +232,7 @@ else:
             formatter_class=_HelpFormatter,
         )
         subparsers = parser.add_subparsers(dest="command", required=True)
-        for name in COMMANDS:
+        for name in LEDGER_COMMANDS:
             sub = subparsers.add_parser(
                 name,
                 help=f"Run the '{name}' CI workflow.",
@@ -187,7 +264,72 @@ else:
                 type=Path,
                 help="Directory where outputs should be written.",
             )
+        paths_parser = subparsers.add_parser(
+            "paths",
+            help="Enumerate directed connectome paths.",
+            formatter_class=_HelpFormatter,
+        )
+        paths_parser.add_argument(
+            "--adjacency",
+            required=True,
+            type=Path,
+            help="Path to a CSV or Parquet adjacency table.",
+        )
+        paths_parser.add_argument(
+            "--source",
+            dest="sources",
+            action="append",
+            required=True,
+            type=int,
+            help="Source root ID; repeat for multiple sources.",
+        )
+        paths_parser.add_argument(
+            "--target",
+            dest="targets",
+            action="append",
+            required=True,
+            type=int,
+            help="Target root ID; repeat for multiple targets.",
+        )
+        paths_parser.add_argument(
+            "--max-hops",
+            dest="max_hops",
+            default=3,
+            type=int,
+            help="Maximum hop distance to explore.",
+        )
+        paths_parser.add_argument(
+            "--source-column",
+            dest="source_column",
+            help="Override automatic source column detection.",
+        )
+        paths_parser.add_argument(
+            "--target-column",
+            dest="target_column",
+            help="Override automatic target column detection.",
+        )
+        paths_parser.add_argument(
+            "--output",
+            dest="output",
+            type=Path,
+            default=PATHS_OUTPUT_DEFAULT,
+            help="Directory where path summaries should be written.",
+        )
         args = parser.parse_args()
+        if args.command == "paths":
+            try:
+                run_paths_workflow(
+                    adjacency=args.adjacency,
+                    sources=args.sources,
+                    targets=args.targets,
+                    max_hops=args.max_hops,
+                    source_column=args.source_column,
+                    target_column=args.target_column,
+                    output=args.output,
+                )
+            except ValueError as err:
+                parser.error(str(err))
+            return
         materialization = getattr(args, "materialization")
         at_timestamp = getattr(args, "at_timestamp")
         try:

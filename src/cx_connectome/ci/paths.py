@@ -16,6 +16,7 @@ __all__ = [
     "GraphPathEnumerator",
     "extract_paths",
     "load_adjacency_table",
+    "write_path_outputs",
     "main",
 ]
 
@@ -208,7 +209,9 @@ def _build_parser() -> ArgumentParser:
     return parser
 
 
-def _write_outputs(result: PathExtractionResult, output_dir: Path, *, metadata: Mapping[str, object]) -> None:
+def write_path_outputs(
+    result: PathExtractionResult, output_dir: Path, *, metadata: Mapping[str, object]
+) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     paths_frame = result.to_frame()
     paths_frame.to_csv(output_dir / "paths.csv", index=False)
@@ -250,7 +253,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "targets": args.targets,
         "max_hops": args.max_hops,
     }
-    _write_outputs(result, args.output, metadata=metadata)
+    write_path_outputs(result, args.output, metadata=metadata)
     return 0
 
 

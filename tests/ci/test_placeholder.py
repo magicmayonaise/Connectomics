@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import importlib.util
 from pathlib import Path
 
 import pandas as pd
@@ -10,6 +11,16 @@ from cx_connectome.ci import paths
 
 def _load_adjacency() -> pd.DataFrame:
     return pd.read_csv(Path("tests/data/path_adjacency.csv"))
+
+
+def _load_ci_cli_module():
+    module_path = Path(__file__).resolve().parents[2] / "scripts" / "ci_cli.py"
+    spec = importlib.util.spec_from_file_location("ci_cli_test", module_path)
+    if spec is None or spec.loader is None:  # pragma: no cover - defensive guard
+        raise RuntimeError("Unable to load ci_cli module for testing")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def test_extract_paths_returns_simple_paths() -> None:
@@ -80,4 +91,41 @@ def test_paths_cli_writes_expected_outputs(tmp_path: Path) -> None:
     summary = json.loads(summary_path.read_text(encoding="utf8"))
     assert summary["path_count"] == 12
     assert summary["sources"] == [1, 2]
+    assert summary["targets"] == [5, 6]
+
+
+def test_ci_cli_paths_helper_executes_workflow(tmp_path: Path) -> None:
+    ci_cli = _load_ci_cli_module()
+    adjacency_path = Path("tests/data/path_adjacency.csv")
+    output_dir = tmp_path / "ci-cli-paths"
+
+    ci_cli.run_paths_workflow(
+        adjacency=adjacency_path,
+        sources=[1],
+        targets=[5, 6],
+        max_hops=3,
+        source_column=None,
+        target_column=None,
+        output=output_dir,
+    )
+
+    csv_path = output_dir / "paths.csv"
+    json_path = output_dir / "paths.json"
+    summary_path = output_dir / "run_summary.json"
+
+    assert csv_path.exists()
+    assert json_path.exists()
+    assert summary_path.exists()
+
+    dataframe = pd.read_csv(csv_path)
+    assert len(dataframe) == 7
+    assert dataframe.iloc[0].to_dict() == {"path_id": 0, "hop_count": 2, "nodes": "1;2;5"}
+
+    payload = json.loads(json_path.read_text(encoding="utf8"))
+    assert len(payload["paths"]) == 7
+    assert payload["paths"][0] == [1, 2, 5]
+
+    summary = json.loads(summary_path.read_text(encoding="utf8"))
+    assert summary["path_count"] == 7
+    assert summary["sources"] == [1]
     assert summary["targets"] == [5, 6]
