@@ -3,6 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from dataclasses import dataclass
+from typing import Any
+
 import pandas as pd
 import pytest
 
@@ -44,6 +47,15 @@ class _FakeMaterialize:
         ]
         self._data = {
             "synapse_table": synapse_df.reset_index(drop=True),
+            "synapses": synapse_df.reset_index(drop=True),
+            "annotations": pd.DataFrame(
+                {
+                    "target_id": pd.Series(dtype="int64"),
+                    "tag": pd.Series(dtype="string"),
+                    "cell_type": pd.Series(dtype="string"),
+                    "super_class": pd.Series(dtype="string"),
+                }
+            ),
             "cell_type_table": cell_type_df.reset_index(drop=True),
         }
 
@@ -53,7 +65,12 @@ class _FakeMaterialize:
     def get_closest_materialization(self, *, timestamp: Any | None = None) -> int:
         return 783
 
-    def query_table(self, *, table: str, filter_in_dict: dict[str, list[int]] | None = None, select_columns: list[str] | None = None, format: str | None = None, **_: Any) -> pd.DataFrame:
+    def query_table(self, *args: Any, table: str | None = None, filter_in_dict: dict[str, list[int]] | None = None, select_columns: list[str] | None = None, format: str | None = None, **_: Any) -> pd.DataFrame:
+        if table is None and args:
+            table = args[0]
+        if table is None:
+            raise ValueError("A table name must be supplied")
+
         data = self._data[table]
         if filter_in_dict:
             filtered = data
