@@ -19,10 +19,22 @@ class _FakeAuth:
 
 
 class _FakeChunkedGraph:
-    def get_roots(self, root_ids: list[int], *, timestamp: Any | None = None) -> dict[int, int]:
+    def get_roots(
+        self,
+        root_ids: list[int],
+        *,
+        timestamp: Any | None = None,
+        materialization: Any | None = None,
+    ) -> dict[int, int]:
         return {int(rid): int(rid) for rid in root_ids}
 
-    def get_latest_roots(self, root_ids: list[int], *, timestamp: Any | None = None) -> dict[int, int]:
+    def get_latest_roots(
+        self,
+        root_ids: list[int],
+        *,
+        timestamp: Any | None = None,
+        materialization: Any | None = None,
+    ) -> dict[int, int]:
         return {int(rid): int(rid) for rid in root_ids}
 
 
