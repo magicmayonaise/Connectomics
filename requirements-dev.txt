@@ -1,0 +1,2 @@
+# requirements-dev.txt  (test-only deps)
+pytest
