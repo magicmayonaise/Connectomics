@@ -59,3 +59,6 @@ def test_connectivity_graph_construction(tmp_path):
     assert all("cell_type" in data for _, data in graph.nodes(data=True))
     assert not n1_n2.empty
     assert not n2_n3.empty
+    assert (tmp_path / "graph.gpickle").exists()
+    assert (tmp_path / "n1n2.parquet").exists()
+    assert (tmp_path / "n2n3.parquet").exists()
