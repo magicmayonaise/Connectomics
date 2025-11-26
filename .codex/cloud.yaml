@@ -1,0 +1,11 @@
+name: connectome-analysis
+repository: https://github.com/magicmayonaise/Connectomics
+branch: connectome-analysis
+environment:
+  python: "3.10"
+  packages:
+    - networkx
+    - pandas
+    - numpy
+    - caveclient
+    - scipy
