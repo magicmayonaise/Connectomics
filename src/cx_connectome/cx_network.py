@@ -11,6 +11,7 @@ downstream analysis.
 from __future__ import annotations
 
 import logging
+import pickle
 from pathlib import Path
 from typing import Any
 
@@ -195,7 +196,8 @@ def build_connectivity_graph(
         graph.number_of_edges(),
         graph_output,
     )
-    nx.write_gpickle(graph, graph_output)
+    with graph_output.open("wb") as handle:
+        pickle.dump(graph, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     LOGGER.info(
         "Example node: %s", next(iter(graph.nodes(data=True)), (None, {}))

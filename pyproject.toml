@@ -11,7 +11,7 @@ authors = [
     {name = "Connectomics Team"},
 ]
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 dependencies = [
     "typer[all]>=0.12",
     "pandas>=2.2",
@@ -57,7 +57,7 @@ quote-style = "double"
 indent-style = "space"
 
 [tool.mypy]
-python_version = "3.13"
+python_version = "3.11"
 warn_unused_configs = true
 warn_return_any = true
 warn_unused_ignores = true
