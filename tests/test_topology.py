@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from topology import TopologyAnalyzer, _compute_correlations
+from cx_connectome.legacy import TopologyAnalyzer, _compute_correlations
 
 
 def sample_syn_count():

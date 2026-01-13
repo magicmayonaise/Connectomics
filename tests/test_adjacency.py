@@ -7,7 +7,7 @@ import pytest
 
 pd = pytest.importorskip("pandas")
 
-from adjacency import trace_next_layer
+from cx_connectome.legacy import trace_next_layer
 
 
 class _StubMaterialize:

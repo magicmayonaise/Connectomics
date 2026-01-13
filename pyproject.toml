@@ -7,11 +7,32 @@ name = "connectomics-cli"
 version = "0.1.0"
 description = "Tools for reproducible CAVE connectomics analysis"
 authors = [
-    {name = "OpenAI Assistant"},
     {name = "Connectomics Team"},
 ]
 readme = "README.md"
 requires-python = ">=3.11"
+license = {text = "MIT"}
+keywords = [
+    "connectomics",
+    "neuroscience",
+    "CAVE",
+    "FlyWire",
+    "Drosophila",
+    "neural-networks",
+    "graph-analysis",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Typing :: Typed",
+]
 dependencies = [
     "typer[all]>=0.12",
     "pandas>=2.2",
@@ -20,10 +41,34 @@ dependencies = [
     "networkx>=3.2",
     "caveclient>=5.10",
     "rich>=13.7",
+    "numpy>=1.26",
+    "scipy>=1.12",
 ]
 
 [project.optional-dependencies]
 dyn = ["torch>=2.4,<3"]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.1",
+    "ruff>=0.4",
+    "mypy>=1.9",
+    "pandas-stubs",
+    "types-PyYAML",
+]
+docs = [
+    "sphinx>=7.0",
+    "sphinx-rtd-theme>=2.0",
+    "myst-parser>=2.0",
+]
+all = [
+    "connectomics-cli[dyn,dev,docs]",
+]
+
+[project.urls]
+Homepage = "https://github.com/magicmayonaise/Connectomics"
+Documentation = "https://github.com/magicmayonaise/Connectomics#readme"
+Repository = "https://github.com/magicmayonaise/Connectomics.git"
+Issues = "https://github.com/magicmayonaise/Connectomics/issues"
 
 [project.scripts]
 connectomics = "connectomics_cli.cli:app"
@@ -33,28 +78,47 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["connectomics_cli*", "cx_connectome*"]
 
 [tool.pytest.ini_options]
-addopts = "-ra"
+addopts = "-ra -q"
 testpaths = ["tests"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
 
 [tool.ruff]
 line-length = 100
 src = ["src", "tests"]
+target-version = "py311"
 
 [tool.ruff.lint]
 select = [
-  "E",
-  "F",
-  "I",
-  "PL",
-  "RUF",
+    "E",      # pycodestyle errors
+    "F",      # pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+    "PL",     # pylint
+    "RUF",    # ruff-specific
+    "SIM",    # flake8-simplify
+    "TCH",    # flake8-type-checking
 ]
-ignore = ["E501"]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "PLR0913", # too many arguments
+    "PLR2004", # magic value comparison
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["connectomics_cli", "cx_connectome"]
 
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+docstring-code-format = true
 
 [tool.mypy]
 python_version = "3.11"
@@ -63,7 +127,31 @@ warn_return_any = true
 warn_unused_ignores = true
 strict = true
 mypy_path = "src"
+plugins = []
+
+[[tool.mypy.overrides]]
+module = [
+    "caveclient.*",
+    "scipy.*",
+    "torch.*",
+]
+ignore_missing_imports = true
 
 [tool.coverage.run]
-source = ["connectomics_cli"]
+source = ["src"]
 branch = true
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "@abstractmethod",
+]
+show_missing = true

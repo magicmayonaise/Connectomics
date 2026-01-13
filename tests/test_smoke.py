@@ -3,16 +3,14 @@
 from __future__ import annotations
 
 import csv
-import sys
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Sequence
 
 import pytest
 
 DATA_DIR = Path(__file__).parent / "data"
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from connectomics.reporting import ConnectivityAnalyzer
+from cx_connectome.legacy import ConnectivityAnalyzer
 
 
 def _read_csv(name: str) -> List[Dict[str, str]]:
